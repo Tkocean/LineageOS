@@ -433,6 +433,8 @@ jobs:
             echo "CONFIG_IP_SET_LIST_SET=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_IP6_NF_NAT=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_IP6_NF_TARGET_MASQUERADE=y" >> arch/arm64/configs/gki_defconfig
+            echo "CONFIG_MQ_IOSCHED_SSG=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_MQ_IOSCHED_SSG_CGROUP=y" >> ./common/arch/arm64/configs/gki_defconfig
           fi
 
           if [[ "${{ inputs.netfilter }}" == "true" ]]; then
