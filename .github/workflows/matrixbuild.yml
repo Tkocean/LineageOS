@@ -32,7 +32,7 @@ jobs:
     strategy:
       matrix:
         rom_source: [Crdroid, LineageOS]
-        ksu_type: [KernelSU-Next-susfs, ReSukiSU-susfs]
+        ksu_type: [KernelSU-Next-susfs, BakaSU-susfs]
       fail-fast: false
 
     steps:
@@ -172,8 +172,8 @@ jobs:
 
           if [[ "${{ matrix.ksu_type }}" == KernelSU-Next-susfs ]]; then
             curl -fLSs "https://raw.githubusercontent.com/pershoot/KernelSU-Next/refs/heads/dev-susfs/kernel/setup.sh" | bash -s dev-susfs
-          elif [[ "${{ matrix.ksu_type }}" == ReSukiSU-susfs ]]; then
-            curl -fLSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash -s main
+          elif [[ "${{ matrix.ksu_type }}" == BakaSU-susfs ]]; then
+            curl -fLSs "https://raw.githubusercontent.com/Baka-SU/BakaSU/main/kernel/setup.sh" | bash -s main
           fi
 
           # Apply the original SUSFS gki-android14-6.1 patch from simonpunk.
@@ -352,8 +352,8 @@ jobs:
         run: |
           if [[ "${{ matrix.ksu_type }}" == "KernelSU-Next-susfs" ]]; then
             ZIP_PREFIX="KernelSU-Next-SUSFS"
-          elif [[ "${{ matrix.ksu_type }}" == "ReSukiSU-susfs" ]]; then
-            ZIP_PREFIX="ReSukiSU-SUSFS"
+          elif [[ "${{ matrix.ksu_type }}" == "BakaSU-susfs" ]]; then
+            ZIP_PREFIX="BakaSU-SUSFS"
           fi
           
           if [[ "${{ inputs.droidspaces }}" == "standard" ]]; then
@@ -425,12 +425,12 @@ jobs:
             |---|---|
             |    ROM 支持   | Crdroid, LineageOS |
             | Clang | [clang-r563880c](https://github.com/AkiHaza/Floran-Kernel/releases/download/toolchain-r563880c/linux-x86-refs_heads_android16-qpr2-release-clang-r563880c.tar.gz) |
-            | KernelSU 方案 |      KernelSU-Next, ReSukiSU       |
+            | KernelSU 方案 |      KernelSU-Next, BakaSU       |
             |   Build时间   |       ${{ env.TIME_FORM }}        |
 
             **Manager downloads:**
             - KernelSU-Next: [KernelSU-Next](https://github.com/KernelSU-Next/KernelSU-Next)
-            - ReSukiSU: [ReSukiSU](https://github.com/ReSukiSU/ReSukiSU)
+            - BakaSU: [BakaSU](https://github.com/Baka-SU/BakaSU)
           draft: false
           prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}

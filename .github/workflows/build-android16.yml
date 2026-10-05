@@ -8,7 +8,7 @@ on:
         required: true
         type: choice
         options:
-          - YAAP-16
+          - YAAP
           - LineageOS
           - Crdroid
           - PixelOS
@@ -19,11 +19,11 @@ on:
         type: choice
         options:
           - KernelSU-Official
-          - ReSukiSU
+          - BakaSU
           - KernelSU-Next
           - KernelSU-Official-susfs
           - KernelSU-Next-susfs
-          - ReSukiSU-susfs
+          - BakaSU-susfs
           - None
 
       lz4_enable:
@@ -74,6 +74,7 @@ jobs:
   build:
     uses: ./.github/workflows/_build-kernel.yml
     with:
+      android_version: 16
       rom_source: ${{ inputs.rom_source }}
       ksu_type: ${{ inputs.ksu_type }}
       lz4_enable: ${{ inputs.lz4_enable }}

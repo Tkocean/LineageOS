@@ -8,8 +8,10 @@ on:
         required: true
         type: choice
         options:
-          - YAAP-17
+          - YAAP
           - DerpFest
+          - LineageOS
+          - Lineage-Opt
 
       ksu_type:
         description: "KernelSU Version"
@@ -17,11 +19,11 @@ on:
         type: choice
         options:
           - KernelSU-Official
-          - ReSukiSU
+          - BakaSU
           - KernelSU-Next
           - KernelSU-Official-susfs
           - KernelSU-Next-susfs
-          - ReSukiSU-susfs
+          - BakaSU-susfs
           - None
 
       lz4_enable:
@@ -72,12 +74,13 @@ jobs:
   build:
     uses: ./.github/workflows/_build-kernel.yml
     with:
+      android_version: 17
       rom_source: ${{ inputs.rom_source }}
       ksu_type: ${{ inputs.ksu_type }}
-      lz4_enable: ${{ inputs.rom_source == 'DerpFest' && inputs.lz4_enable }}
+      lz4_enable: ${{ inputs.rom_source != 'YAAP' && inputs.lz4_enable }}
       netfilter: ${{ inputs.netfilter }}
       ccm: ${{ inputs.ccm }}
-      droidspaces: ${{ inputs.rom_source == 'DerpFest' && inputs.droidspaces || 'none' }}
+      droidspaces: ${{ inputs.rom_source != 'YAAP' && inputs.droidspaces || 'none' }}
       kernel_name: ${{ inputs.kernel_name }}
       create_release: ${{ inputs.create_release }}
     secrets: inherit
