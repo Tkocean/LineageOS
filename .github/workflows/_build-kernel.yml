@@ -91,7 +91,7 @@ jobs:
             git clone --depth=1 -b lineage-24.0 https://github.com/LineageOS/android_kernel_oneplus_sm8650.git sm8650
             git clone --depth=1 -b lineage-24.0 https://github.com/LineageOS/android_kernel_oneplus_sm8650-modules.git sm8650-modules
 
-          elif [[ "${{ inputs.rom_source }}" == "Lineage-Opt" && "${{ inputs.android_version }}" == "17" ]]; then
+          elif [[ "${{ inputs.rom_source }}" == "FrierenKernel" && "${{ inputs.android_version }}" == "17" ]]; then
             git clone --depth=1 -b lineage-24.0 https://github.com/AkiHaza/custom_kernel_oneplus_sm8650.git sm8650
             git clone --depth=1 -b lineage-24.0 https://github.com/AkiHaza/custom_kernel_oneplus_sm8650-modules.git sm8650-modules
 
@@ -128,16 +128,16 @@ jobs:
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Apply lz4 patch
-        if: inputs.lz4_enable && inputs.rom_source != 'YAAP'
+        if: inputs.lz4_enable && inputs.rom_source != 'YAAP' && inputs.rom_source != 'FrierenKernel'
         run: |
           cd sm8650
           patch_file=../patch/lz4.patch
-          if [[ "${{ inputs.rom_source }}" == "LineageOS" || "${{ inputs.rom_source }}" == "Lineage-Opt" || "${{ inputs.rom_source }}" == "DerpFest" ]]; then
+          if [[ "${{ inputs.rom_source }}" == "LineageOS" || "${{ inputs.rom_source }}" == "DerpFest" ]]; then
             patch_file=../patch/lz4-lineage.patch
             echo "Using the Android 6.1 compatible LZ4 patch for ${{ inputs.rom_source }}."
           fi
 
-          if [[ "${{ inputs.rom_source }}" == "LineageOS" || "${{ inputs.rom_source }}" == "Lineage-Opt" || "${{ inputs.rom_source }}" == "DerpFest" ]]; then
+          if [[ "${{ inputs.rom_source }}" == "LineageOS" || "${{ inputs.rom_source }}" == "DerpFest" ]]; then
             git apply --check -p1 < "$patch_file"
             git apply -p1 < "$patch_file"
             test -f include/linux/lz4.h
@@ -408,11 +408,11 @@ jobs:
           sed -i "s|CONFIG_MODULE_SIG_PROTECT=y|CONFIG_MODULE_SIG_PROTECT=n|" arch/arm64/configs/gki_defconfig
           echo "CONFIG_TMPFS_XATTR=y" >> arch/arm64/configs/gki_defconfig
 
-          if [[ "${{ inputs.rom_source }}" != "YAAP" && "${{ inputs.rom_source }}" != "DerpFest" ]]; then
+          if [[ "${{ inputs.rom_source }}" != "YAAP" && "${{ inputs.rom_source }}" != "DerpFest" && "${{ inputs.rom_source }}" != "FrierenKernel" ]]; then
             echo "CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE=y" >> arch/arm64/configs/gki_defconfig
           fi
 
-          if [[ "${{ inputs.ccm }}" == "true" ]]; then
+          if [[ "${{ inputs.ccm }}" == "true" && "${{ inputs.rom_source }}" != "FrierenKernel" ]]; then
             echo "CONFIG_TCP_CONG_ADVANCED=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_TCP_CONG_BBR=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_NET_SCH_FQ=y" >> arch/arm64/configs/gki_defconfig
@@ -425,7 +425,7 @@ jobs:
             echo "CONFIG_IP_NF_TARGET_ECN=y" >> arch/arm64/configs/gki_defconfig
           fi
 
-          if [[ "${{ inputs.netfilter }}" == "true" ]]; then
+          if [[ "${{ inputs.netfilter }}" == "true" && "${{ inputs.rom_source }}" != "FrierenKernel" ]]; then
             echo "CONFIG_BPF_STREAM_PARSER=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_NETFILTER_XT_SET=y" >> arch/arm64/configs/gki_defconfig
@@ -451,7 +451,7 @@ jobs:
             echo "CONFIG_IP6_NF_TARGET_MASQUERADE=y" >> arch/arm64/configs/gki_defconfig
           fi
 
-          if [[ "${{ inputs.netfilter }}" == "true" ]]; then
+          if [[ "${{ inputs.netfilter }}" == "true" && "${{ inputs.rom_source }}" != "FrierenKernel" ]]; then
             echo "Applying IPv6_NAT Fix..."
             git apply ../patch/ipv6fix.patch
           fi

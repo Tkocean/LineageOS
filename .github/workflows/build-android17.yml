@@ -11,7 +11,7 @@ on:
           - YAAP
           - DerpFest
           - LineageOS
-          - Lineage-Opt
+          - FrierenKernel
 
       ksu_type:
         description: "KernelSU Version"
@@ -77,9 +77,9 @@ jobs:
       android_version: 17
       rom_source: ${{ inputs.rom_source }}
       ksu_type: ${{ inputs.ksu_type }}
-      lz4_enable: ${{ inputs.rom_source != 'YAAP' && inputs.lz4_enable }}
-      netfilter: ${{ inputs.netfilter }}
-      ccm: ${{ inputs.ccm }}
+      lz4_enable: ${{ inputs.rom_source != 'YAAP' && inputs.rom_source != 'FrierenKernel' && inputs.lz4_enable }}
+      netfilter: ${{ inputs.rom_source != 'FrierenKernel' && inputs.netfilter }}
+      ccm: ${{ inputs.rom_source != 'FrierenKernel' && inputs.ccm }}
       droidspaces: ${{ inputs.rom_source != 'YAAP' && inputs.droidspaces || 'none' }}
       kernel_name: ${{ inputs.kernel_name }}
       create_release: ${{ inputs.create_release }}
