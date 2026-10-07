@@ -423,6 +423,8 @@ jobs:
             echo "CONFIG_TCP_ECN=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_IPV6_ECN=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_IP_NF_TARGET_ECN=y" >> arch/arm64/configs/gki_defconfig
+            echo "CONFIG_MQ_IOSCHED_SSG=y" >> arch/arm64/configs/gki_defconfig
+            echo "CONFIG_MQ_IOSCHED_SSG_CGROUP=y" >> arch/arm64/configs/gki_defconfig
           fi
 
           if [[ "${{ inputs.netfilter }}" == "true" && "${{ inputs.rom_source }}" != "FrierenKernel" ]]; then
@@ -447,8 +449,12 @@ jobs:
             echo "CONFIG_IP_SET_HASH_NETPORT=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_IP_SET_HASH_NETIFACE=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_IP_SET_LIST_SET=y" >> arch/arm64/configs/gki_defconfig
+            echo "CONFIG_NF_NAT=y" >> arch/arm64/configs/gki_defconfig
+            echo "CONFIG_NF_NAT_IPV6=y" >> arch/arm64/configs/gki_defconfig
+            echo "CONFIG_IP6_NF_IPTABLES=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_IP6_NF_NAT=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_IP6_NF_TARGET_MASQUERADE=y" >> arch/arm64/configs/gki_defconfig
+            echo "CONFIG_IP6_NF_TARGET_REDIRECT=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_MQ_IOSCHED_SSG=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_MQ_IOSCHED_SSG_CGROUP=y" >> arch/arm64/configs/gki_defconfig
           fi
