@@ -3,6 +3,11 @@ name: Build Kernel Core
 on:
   workflow_call:
     inputs:
+      android_version:
+        description: Android version (16 or 17)
+        required: true
+        type: number
+
       rom_source:
         description: ROM Kernel Source Code
         required: true
@@ -66,33 +71,44 @@ jobs:
 
       - name: Clone Kernel Source and Download Clang Toolchain
         run: |
-          if [[ "${{ inputs.rom_source }}" == "YAAP-16" ]]; then
+          if [[ "${{ inputs.rom_source }}" == "YAAP" && "${{ inputs.android_version }}" == "16" ]]; then
             git clone --depth=1 -b sixteen https://github.com/AkiHaza/android_kernel_oneplus_sm8650.git sm8650
             git clone --depth=1 -b sixteen https://github.com/AkiHaza/android_kernel_oneplus_sm8650-modules.git sm8650-modules
 
-          elif [[ "${{ inputs.rom_source }}" == "YAAP-17" ]]; then
+          elif [[ "${{ inputs.rom_source }}" == "YAAP" && "${{ inputs.android_version }}" == "17" ]]; then
             git clone --depth=1 -b seventeen https://github.com/AkiHaza/android_kernel_oneplus_sm8650.git sm8650
             git clone --depth=1 -b seventeen https://github.com/AkiHaza/android_kernel_oneplus_sm8650-modules.git sm8650-modules
 
-          elif [[ "${{ inputs.rom_source }}" == "DerpFest" ]]; then
+          elif [[ "${{ inputs.rom_source }}" == "DerpFest" && "${{ inputs.android_version }}" == "17" ]]; then
             git clone --depth=1 -b lineage-23.2 https://github.com/ppanzenboeck/android_kernel_oneplus_sm8650.git sm8650
             git clone --depth=1 -b derp16.2-arb https://github.com/ppanzenboeck/android_kernel_oneplus_sm8650-modules.git sm8650-modules
 
-          elif [[ "${{ inputs.rom_source }}" == "LineageOS" ]]; then
+          elif [[ "${{ inputs.rom_source }}" == "LineageOS" && "${{ inputs.android_version }}" == "16" ]]; then
             git clone --depth=1 -b lineage-23.2 https://github.com/LineageOS/android_kernel_oneplus_sm8650.git sm8650
             git clone --depth=1 -b lineage-23.2 https://github.com/LineageOS/android_kernel_oneplus_sm8650-modules.git sm8650-modules
 
-          elif [[ "${{ inputs.rom_source }}" == "Crdroid" ]]; then
+          elif [[ "${{ inputs.rom_source }}" == "LineageOS" && "${{ inputs.android_version }}" == "17" ]]; then
+            git clone --depth=1 -b lineage-24.0 https://github.com/LineageOS/android_kernel_oneplus_sm8650.git sm8650
+            git clone --depth=1 -b lineage-24.0 https://github.com/LineageOS/android_kernel_oneplus_sm8650-modules.git sm8650-modules
+
+          elif [[ "${{ inputs.rom_source }}" == "FrierenKernel" && "${{ inputs.android_version }}" == "17" ]]; then
+            git clone --depth=1 -b lineage-24.0 https://github.com/AkiHaza/custom_kernel_oneplus_sm8650.git sm8650
+            git clone --depth=1 -b lineage-24.0 https://github.com/AkiHaza/custom_kernel_oneplus_sm8650-modules.git sm8650-modules
+
+          elif [[ "${{ inputs.rom_source }}" == "Crdroid" && "${{ inputs.android_version }}" == "16" ]]; then
             git clone --depth=1 -b 16.0 https://github.com/crdroidandroid/android_kernel_oneplus_sm8650.git sm8650
             git clone --depth=1 -b 16.0 https://github.com/crdroidandroid/android_kernel_oneplus_sm8650-modules.git sm8650-modules
 
-          elif [[ "${{ inputs.rom_source }}" == "PixelOS" ]]; then
+          elif [[ "${{ inputs.rom_source }}" == "PixelOS" && "${{ inputs.android_version }}" == "16" ]]; then
             git clone --depth=1 -b sixteen-qpr2 https://github.com/PixelOS-Devices/android_kernel_oneplus_sm8650.git sm8650
             git clone --depth=1 -b sixteen-qpr2 https://github.com/PixelOS-Devices/android_kernel_oneplus_sm8650-modules.git sm8650-modules
 
+          else
+            echo "Unsupported ROM source for Android ${{ inputs.android_version }}: ${{ inputs.rom_source }}" >&2
+            exit 1
           fi
 
-          if [[ "${{ inputs.rom_source }}" == "YAAP-17" || "${{ inputs.rom_source }}" == "DerpFest" ]]; then
+          if [[ "${{ inputs.android_version }}" == "17" ]]; then
             CLANG_VERSION="clang-r596125"
             CLANG_URL="https://github.com/AkiHaza/Floran-Kernel/releases/download/toolchain-r596125/linux-x86-refs_heads_android17-release-clang-r596125.tar.gz"
           else
@@ -112,7 +128,7 @@ jobs:
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Apply lz4 patch
-        if: inputs.lz4_enable && inputs.rom_source != 'YAAP-16' && inputs.rom_source != 'YAAP-17'
+        if: inputs.lz4_enable && inputs.rom_source != 'YAAP' && inputs.rom_source != 'FrierenKernel'
         run: |
           cd sm8650
           patch_file=../patch/lz4.patch
@@ -135,7 +151,7 @@ jobs:
           fi
 
       - name: Apply Droidspaces patches
-        if: inputs.droidspaces != 'none' && inputs.rom_source != 'YAAP-16' && inputs.rom_source != 'YAAP-17'
+        if: inputs.droidspaces != 'none' && inputs.rom_source != 'YAAP'
         run: |
           cd sm8650
 
@@ -168,7 +184,7 @@ jobs:
           fi
 
       - name: Apply Droidspaces Extended patches
-        if: inputs.droidspaces == 'extended' && inputs.rom_source != 'YAAP-16' && inputs.rom_source != 'YAAP-17'
+        if: inputs.droidspaces == 'extended' && inputs.rom_source != 'YAAP'
         run: |
           cd sm8650
 
@@ -189,7 +205,7 @@ jobs:
           fi
 
       - name: Fix extract-cert key_pass compatibility
-        if: inputs.rom_source != 'YAAP-16'
+        if: inputs.rom_source != 'YAAP' || inputs.android_version != 16
         run: |
           cd sm8650
           python3 - <<'PY'
@@ -231,7 +247,7 @@ jobs:
 
       - name: Compile Kernel
         run: |
-          if [[ "${{ inputs.rom_source }}" == "YAAP-17" || "${{ inputs.rom_source }}" == "DerpFest" ]]; then
+          if [[ "${{ inputs.android_version }}" == "17" ]]; then
             CLANG_VERSION="clang-r596125"
           else
             CLANG_VERSION="clang-r563880c"
@@ -256,8 +272,8 @@ jobs:
           elif [[ "${{ inputs.ksu_type }}" == KernelSU-Next ]]; then
             curl -fLSs "https://raw.githubusercontent.com/pershoot/KernelSU-Next/refs/heads/dev-susfs/kernel/setup.sh" | bash -s main
 
-          elif [[ "${{ inputs.ksu_type }}" == ReSukiSU* ]]; then
-            curl -fLSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash -s main
+          elif [[ "${{ inputs.ksu_type }}" == BakaSU* ]]; then
+            curl -fLSs "https://raw.githubusercontent.com/Baka-SU/BakaSU/main/kernel/setup.sh" | bash -s main
           fi
 
           if [[ "${{ inputs.ksu_type }}" == *susfs ]]; then
@@ -392,11 +408,11 @@ jobs:
           sed -i "s|CONFIG_MODULE_SIG_PROTECT=y|CONFIG_MODULE_SIG_PROTECT=n|" arch/arm64/configs/gki_defconfig
           echo "CONFIG_TMPFS_XATTR=y" >> arch/arm64/configs/gki_defconfig
 
-          if [[ "${{ inputs.rom_source }}" != "YAAP-16" && "${{ inputs.rom_source }}" != "YAAP-17" && "${{ inputs.rom_source }}" != "DerpFest" ]]; then
+          if [[ "${{ inputs.rom_source }}" != "YAAP" && "${{ inputs.rom_source }}" != "DerpFest" && "${{ inputs.rom_source }}" != "FrierenKernel" ]]; then
             echo "CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE=y" >> arch/arm64/configs/gki_defconfig
           fi
 
-          if [[ "${{ inputs.ccm }}" == "true" ]]; then
+          if [[ "${{ inputs.ccm }}" == "true" && "${{ inputs.rom_source }}" != "FrierenKernel" ]]; then
             echo "CONFIG_TCP_CONG_ADVANCED=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_TCP_CONG_BBR=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_NET_SCH_FQ=y" >> arch/arm64/configs/gki_defconfig
@@ -409,7 +425,7 @@ jobs:
             echo "CONFIG_IP_NF_TARGET_ECN=y" >> arch/arm64/configs/gki_defconfig
           fi
 
-          if [[ "${{ inputs.netfilter }}" == "true" ]]; then
+          if [[ "${{ inputs.netfilter }}" == "true" && "${{ inputs.rom_source }}" != "FrierenKernel" ]]; then
             echo "CONFIG_BPF_STREAM_PARSER=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_NETFILTER_XT_SET=y" >> arch/arm64/configs/gki_defconfig
@@ -437,7 +453,7 @@ jobs:
             echo "CONFIG_MQ_IOSCHED_SSG_CGROUP=y" >> arch/arm64/configs/gki_defconfig
           fi
 
-          if [[ "${{ inputs.netfilter }}" == "true" ]]; then
+          if [[ "${{ inputs.netfilter }}" == "true" && "${{ inputs.rom_source }}" != "FrierenKernel" ]]; then
             echo "Applying IPv6_NAT Fix..."
             git apply ../patch/ipv6fix.patch
           fi
@@ -464,10 +480,10 @@ jobs:
             ZIP_PREFIX="KernelSU-Next-SUSFS"
           elif [[ "${{ inputs.ksu_type }}" == "KernelSU-Next" ]]; then
             ZIP_PREFIX="KernelSU-Next"
-          elif [[ "${{ inputs.ksu_type }}" == "ReSukiSU" ]]; then
-            ZIP_PREFIX="ReSukiSU"
-          elif [[ "${{ inputs.ksu_type }}" == "ReSukiSU-susfs" ]]; then
-            ZIP_PREFIX="ReSukiSU-SUSFS"
+          elif [[ "${{ inputs.ksu_type }}" == "BakaSU" ]]; then
+            ZIP_PREFIX="BakaSU"
+          elif [[ "${{ inputs.ksu_type }}" == "BakaSU-susfs" ]]; then
+            ZIP_PREFIX="BakaSU-SUSFS"
           elif [[ "${{ inputs.ksu_type }}" == "None" ]]; then
             ZIP_PREFIX="Non-KSU"
           fi
@@ -479,7 +495,7 @@ jobs:
             ZIP_PREFIX="${ZIP_PREFIX}-dss-ext"
           fi
 
-          ZIP_NAME="${{ inputs.rom_source }}-${ZIP_PREFIX}-$(date -u +"%m%d")"
+          ZIP_NAME="${{ inputs.rom_source }}-A${{ inputs.android_version }}-${ZIP_PREFIX}-$(date -u +"%m%d")"
           git clone --depth=1 https://github.com/AkiHaza/AnyKernel3.git
           cp sm8650/out/arch/arm64/boot/Image AnyKernel3/Image
           cd AnyKernel3
@@ -488,7 +504,7 @@ jobs:
       - name: Upload ZIP artifact
         uses: actions/upload-artifact@v6
         with:
-          name: Kernel_ZIP_${{ inputs.rom_source }}
+          name: Kernel_ZIP_A${{ inputs.android_version }}_${{ inputs.rom_source }}
           path: "*.zip"
 
   release:
@@ -503,7 +519,7 @@ jobs:
       - name: Download ZIP artifact
         uses: actions/download-artifact@v7
         with:
-          name: Kernel_ZIP_${{ inputs.rom_source }}
+          name: Kernel_ZIP_A${{ inputs.android_version }}_${{ inputs.rom_source }}
           path: ./release_zips
 
       - name: Set release env
@@ -513,7 +529,7 @@ jobs:
           echo "TIME=$TIME" >> $GITHUB_ENV
           echo "TIME_FORM=$TIME_FORM" >> $GITHUB_ENV
 
-          if [[ "${{ inputs.rom_source }}" == "YAAP-17" || "${{ inputs.rom_source }}" == "DerpFest" ]]; then
+          if [[ "${{ inputs.android_version }}" == "17" ]]; then
             CLANG_VERSION="clang-r596125"
             CLANG_URL="https://github.com/AkiHaza/Floran-Kernel/releases/download/toolchain-r596125/linux-x86-refs_heads_android17-release-clang-r596125.tar.gz"
           else
@@ -531,10 +547,10 @@ jobs:
             KSU_TYPENAME="KernelSU-Next + SUSFS"
           elif [[ "${{ inputs.ksu_type }}" == "KernelSU-Next" ]]; then
             KSU_TYPENAME="KernelSU-Next"
-          elif [[ "${{ inputs.ksu_type }}" == "ReSukiSU" ]]; then
-            KSU_TYPENAME="ReSukiSU"
-          elif [[ "${{ inputs.ksu_type }}" == "ReSukiSU-susfs" ]]; then
-            KSU_TYPENAME="ReSukiSU + SUSFS"
+          elif [[ "${{ inputs.ksu_type }}" == "BakaSU" ]]; then
+            KSU_TYPENAME="BakaSU"
+          elif [[ "${{ inputs.ksu_type }}" == "BakaSU-susfs" ]]; then
+            KSU_TYPENAME="BakaSU + SUSFS"
           elif [[ "${{ inputs.ksu_type }}" == "None" ]]; then
             KSU_TYPENAME="Non-KSU"
           fi
@@ -549,8 +565,8 @@ jobs:
           echo "KSU_TYPENAME=${KSU_TYPENAME}" >> $GITHUB_ENV
 
           SOURCE="${{ inputs.rom_source }}"
-          echo "REL_TAG=${SOURCE}-${{ inputs.ksu_type }}-${TIME}" >> $GITHUB_ENV
-          echo "REL_TITLE=${SOURCE} | ${KSU_TYPENAME}" >> $GITHUB_ENV
+          echo "REL_TAG=${SOURCE}-A${{ inputs.android_version }}-${{ inputs.ksu_type }}-${TIME}" >> $GITHUB_ENV
+          echo "REL_TITLE=${SOURCE} | Android ${{ inputs.android_version }} | ${KSU_TYPENAME}" >> $GITHUB_ENV
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
@@ -562,6 +578,7 @@ jobs:
             | Field | Value |
             |---|---|
             | Source | ${{ inputs.rom_source }} |
+            | Android | ${{ inputs.android_version }} |
             | Clang | [${{ env.CLANG_VERSION }}](${{ env.CLANG_URL }}) |
             | KernelSU | ${{ env.KSU_TYPENAME }} |
             | Droidspaces | ${{ inputs.droidspaces }} |
@@ -570,7 +587,7 @@ jobs:
             **Manager downloads:**
             - KernelSU (Official): [tiann/KernelSU](https://github.com/tiann/KernelSU)
             - KernelSU-Next: [KernelSU-Next](https://github.com/KernelSU-Next/KernelSU-Next)
-            - ReSukiSU: [ReSukiSU](https://github.com/ReSukiSU/ReSukiSU)
+            - BakaSU: [BakaSU](https://github.com/Baka-SU/BakaSU)
           draft: false
           prerelease: false
           files: release_zips/*.zip
